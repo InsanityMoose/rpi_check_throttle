@@ -2,7 +2,6 @@
 check_throttled () {
 for (( i=0; i<n; i++)); do
   if (( $monitoring )); then echo -en "\033[1A\033[K"; fi
-#  if (( $monitoring )); then echo -en "\033[1A"; fi
 done
 
 let n=0
@@ -34,9 +33,6 @@ if ((`vcgencmd get_throttled` & (1 << 19))); then
   echo -e "\033[K19: Soft temp limit has occured"
   if (( $monitoring )); then ((n++)); fi
 fi
-#(( n++ ))
-#if (( $monitoring )); then echo -e "\033[${n}A"; fi
-#echo -n "$n"
 }
 
 let timing=2
