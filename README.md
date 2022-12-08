@@ -5,4 +5,5 @@ Bash script for checking and monitoring throttling on Raspberry Pi Linux in a hu
         -h:     Show help
         -l:     Loop output
         -m:     Monitoring mode, use with -l
-        -t:     timing in seconds for -l
+        -d:     delay between measurements in seconds
+        -t:     Measure temperature
