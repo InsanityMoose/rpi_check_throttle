@@ -5,39 +5,49 @@ for (( i=0; i<n; i++)); do
 done
 
 let n=0
-if ((`vcgencmd get_throttled` & (1 << 0))); then
-  echo -e "\033[K0: under-voltage"
+(( `vcgencmd get_throttled` ))
+
+if (( $temperature )); then
+  echo -e "Temperature: `vcgencmd measure_temp`"
   if (( $monitoring )); then ((n++)); fi
 fi
-if ((`vcgencmd get_throttled` & (1 << 1))); then
-  echo -e "\033[K1: arm frequency capped"
+if (( $throttled & (1 << 0) )); then
+  echo -e "under-voltage"
   if (( $monitoring )); then ((n++)); fi
 fi
-if ((`vcgencmd get_throttled` & (1 << 3))); then
-  echo -e "\033[K3: Soft temp limit reached"
+if (( $throttled & (1 << 1) )); then
+  echo -e "arm frequency capped"
   if (( $monitoring )); then ((n++)); fi
 fi
-if ((`vcgencmd get_throttled` & (1 << 16))); then
-  echo -e "\033[K16: under-voltage has occured"
+if (( $throttled & (1 << 3) )); then
+  echo -e "Soft temp limit reached"
   if (( $monitoring )); then ((n++)); fi
 fi
-if ((`vcgencmd get_throttled` & (1 << 17))); then
-  echo -e "\033[K17: arm frequency capped has occured"
+if (( $throttled & (1 << 16) )); then
+  echo -e "under-voltage has occured"
+  if (( $monitoring )); then ((n++)); fi
+fi
+if (( $throttled & (1 << 17) )); then
+  echo -e "arm frequency capped has occured"
   if (( $monitoring )); then n++; fi
 fi
-if ((`vcgencmd get_throttled` & (1 << 18))); then
-  echo -e "\033[K18: throttling has occured"
+if (( $throttled & (1 << 18) )); then
+  echo -e "throttling has occured"
   if (( $monitoring )); then ((n++)); fi
 fi
-if ((`vcgencmd get_throttled` & (1 << 19))); then
-  echo -e "\033[K19: Soft temp limit has occured"
+if (( $throttled & (1 << 19) )); then
+  echo -e "Soft temp limit has occured"
+  if (( $monitoring )); then ((n++)); fi
+fi
+if (( !($throttled ) )); then
+  echo -e "No throttling has occured"
   if (( $monitoring )); then ((n++)); fi
 fi
 }
 
 let timing=2
 
-while getopts "hlmt:" options; do
+while getopts "hlmtd:" options; do
   case "${options}" in
     h)
       echo "Get CPU throttle status in human readable format"
@@ -45,21 +55,25 @@ while getopts "hlmt:" options; do
       echo "	-h:	Show help"
       echo "	-l:	Loop output"
       echo "	-m:     Monitoring mode, use with -l"
-      echo "	-t: 	timing in seconds for -l"
+      echo "	-t: 	measure temperature"
+      echo "	-d: 	delay between measurements in seconds"
       exit 0
       ;;
     l)
 	(( loop = 1 ))
       ;;
-    m)
-      (( monitoring = 1))
-      ;;
     t)
+      (( temperature = 1 ))
+      ;;
+    m)
+      (( monitoring = 1 ))
+      ;;
+    d)
       let timing=${OPTARG}
       ;;
     :)
-       echo "Error: No arguments?"
-       exit 1
+      echo "Error: No arguments?"
+      exit 1
       ;;
     *)
       echo "Unknown error"
